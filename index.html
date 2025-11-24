@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ev Bütçe Takibi | EGE 💸 V8.4 (Gelişmiş)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> 
+    
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+
+    <div id="app-container">
+
+        <header class="app-header">
+            <h1 id="appHeaderTitle">Ev Bütçe Takibi 💸 - Ana Sayfa</h1>
+        </header>
+        
+        <div id="overdueAlert" style="display: none;">
+            </div>
+
+        <main class="page-main">
+            
+            <div id="pageDashboard" class="page-content active">
+                
+                <div id="balanceSummaryCard" class="card">
+                    <h3>🏦 Genel Varlık Durumu</h3>
+                    </div>
+                
+                <div id="billStatusSummary" class="card bill-status-summary">
+                    </div>
+
+                <div class="filter-buttons">
+                    <button id="filterPaid" class="active" onclick="DashboardModule.setTransactionFilter('paid')"><i class="fas fa-check-circle"></i> Ödendi</button>
+                    <button id="filterUnpaid" onclick="DashboardModule.setTransactionFilter('unpaid')"><i class="fas fa-times-circle"></i> Ödenmedi</button>
+                    <button id="filterPending" onclick="DashboardModule.setTransactionFilter('pending')"><i class="fas fa-clock"></i> Beklemede</button>
+                </div>
+
+                <div class="card transaction-input-card">
+                    <h3>🚀 Hızlı İşlem Ekle</h3>
+                    <form id="transactionForm">
+                        <div class="type-selector">
+                            <button type="button" id="btnExpense" onclick="App.setTransactionType('expense')" class="active"><i class="fas fa-minus-circle"></i> Gider</button>
+                            <button type="button" id="btnIncome" onclick="App.setTransactionType('income')"><i class="fas fa-plus-circle"></i> Gelir</button>
+                            <input type="hidden" id="type" name="type" value="expense">
+                            <input type="hidden" name="accountId" value="1">
+                        </div>
+                        
+                        <label>Tarih
+                            <input type="date" id="date" name="date" required>
+                        </label>
+                        <label>Ana Kategori
+                            <select id="mainCategory" name="mainCategory" onchange="App.handleCategoryChange()" required></select>
+                        </label>
+                        <label>Alt Kategori
+                            <select id="subCategory" name="subCategory" required></select>
+                        </label>
+                        
+                        <div id="investmentFields" style="display: none; flex-direction: column; gap: 10px;">
+                            <label>Yatırım Adı/Sembolü
+                                <input type="text" id="investmentName" name="investmentName" placeholder="Ör: Fon Adı/Hisse Senedi">
+                            </label>
+                            <div style="display: flex; gap: 10px;">
+                                <label style="flex: 1;">Adet/Miktar
+                                    <input type="number" step="0.0001" id="investmentQuantity" name="investmentQuantity" placeholder="Adet">
+                                </label>
+                                <label style="flex: 1;">Birim Fiyat (TL)
+                                    <input type="number" step="0.01" id="investmentPrice" name="investmentPrice" placeholder="Birim Fiyat">
+                                </label>
+                            </div>
+                        </div>
+
+                        <label id="normalAmountLabel">Miktar (TL)
+                            <input type="number" step="0.01" id="amount" name="amount" placeholder="Ör: 150.00" required>
+                        </label>
+                        
+                        <label>Not (İsteğe Bağlı)
+                            <input type="text" id="note" name="note" placeholder="Ör: Haftalık Market Alışverişi">
+                        </label>
+
+                        <label>Durum
+                            <select id="transactionStatus" name="status" required>
+                                <option value="paid">Ödendi</option>
+                                <option value="unpaid">Ödenmedi</option>
+                                <option value="pending">Beklemede</option>
+                            </select>
+                        </label>
+                        
+                        <button type="submit" class="btn-primary" style="margin-top: 15px;"><i class="fas fa-save"></i> İşlemi Kaydet</button>
+                    </form>
+                </div>
+
+                <div id="transactionsListCard" class="card">
+                    <h3>🧾 Son İşlemler</h3>
+                    <ul id="transactionList" class="transaction-list">
+                        </ul>
+                </div>
+            </div>
+
+            <div id="pageReports" class="page-content">
+                <div class="card">
+                    <div class="card-header-flex">
+                        <div class="month-selector">
+                            <button onclick="ReportModule.changeReportMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <h3 id="reportMonthDisplay">📊 Aylık Rapor</h3>
+                            <button id="nextReportMonthBtn" onclick="ReportModule.changeReportMonth(1)" disabled><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 15px;">Gelir/Gider Akış Grafiği</h4>
+                    <div class="chart-container" style="height: 250px; margin-bottom: 25px;">
+                        <canvas id="incomeExpenseChart"></canvas>
+                    </div>
+                    
+                    <h4>Kategori Harcama Dağılımı</h4>
+                    <div class="chart-container" style="height: 250px; max-width: 300px; margin: 15px auto;">
+                        <canvas id="categoryDistributionChart"></canvas>
+                    </div>
+                    
+                    <h4 style="margin-top: 25px;">50/30/20 Analizi</h4>
+                    <div id="ruleAdvice" class="rule-advice-box">Analiz yükleniyor...</div>
+                    
+                    <div id="ruleChartTable" class="report-section" style="overflow-x: auto; margin-bottom: 20px;"></div>
+                </div>
+            </div>
+            
+            <div id="pageBills" class="page-content">
+                 <div class="card">
+                     <div class="card-header-flex">
+                         <h3>Tekrarlayan Aylık Ödemeler</h3>
+                         <button class="btn-primary" onclick="BillsModule.openBillModal('add')"><i class="fas fa-plus"></i> Fatura Ekle</button>
+                     </div>
+                     
+                     <ul id="billListContainer" class="bill-list" style="margin-top: 20px;">
+                         <li class="bill-list-header">
+                            <span>Ödeme/Kategori</span>
+                            <span>Miktar</span>
+                            <span>Vade</span>
+                            <span>Durum</span>
+                         </li>
+                         </ul>
+                 </div>
+            </div>
+
+            <div id="pagePortfolio" class="page-content">
+                 <div class="card portfolio-summary">
+                    <div class="card-header-flex" style="margin-bottom: 10px;">
+                        <h3>📈 Portföy Özeti</h3>
+                        <button class="btn-secondary" onclick="Utils.toggleSnoozeMode()" style="font-size: 0.9em;"><i class="fas fa-eye-slash"></i> <span id="snoozeBtnText">Rakamları Gizle</span></button>
+                    </div>
+
+                    <div class="summary-grid">
+                        <div><p>Toplam Piyasa Değeri</p><span id="totalPortfolioValue" style="font-size: 1.5em; font-weight: bold;">0,00 TL</span></div>
+                        <div><p>Yatırım Ana Parası</p><span id="totalCost" style="color: var(--secondary-color);">0,00 TL</span></div>
+                        <div><p>Net Kâr/Zarar:</p><span id="netProfitLoss" class="gain">0,00 TL</span></div>
+                        <div><p>Günlük Değişim:</p><span id="dailyChangeSum" class="gain">0,00 TL</span></div>
+                    </div>
+                    <button class="btn-secondary" onclick="PortfolioModule.openManualUpdateModal()" style="margin-top: 15px;"><i class="fas fa-edit"></i> Fiyatları Manuel Güncelle</button>
+                 </div>
+                 
+                 <div class="card">
+                     <h3>Yatırım Varlıkları</h3>
+                     <div id="portfolioListContainer" class="portfolio-list">
+                         </div>
+                 </div>
+            </div>
+
+            <div id="pageManagement" class="page-content">
+                <div class="card">
+                    <h3>🎯 50/30/20 Kural Yönetimi</h3>
+                    <form id="rateForm" onsubmit="ManagementModule.save503020Rates(event)">
+                        <label>İhtiyaçlar (Max %50):
+                            <input type="number" id="rateNeeds" min="0" max="100" required>
+                        </label>
+                        <label>Keyfi Harcamalar (Max %30):
+                            <input type="number" id="rateWants" min="0" max="100" required>
+                        </label>
+                        <label>Tasarruf/Yatırım (Min %20):
+                            <input type="number" id="rateSavings" min="0" max="100" required>
+                        </label>
+                        <p id="rateWarning" style="font-size: 0.9em; margin-top: 10px;">Toplam: 100%</p>
+                        <button type="submit" class="btn-primary">Oranları Kaydet</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Kategori Yönetimi</h3>
+                    <div class="category-tabs">
+                        <button onclick="document.getElementById('mainCategoryListWrapper').style.display='block'; document.getElementById('subCategoryListWrapper').style.display='none';" class="btn-secondary active">Ana Kategoriler</button>
+                        <button onclick="document.getElementById('mainCategoryListWrapper').style.display='none'; document.getElementById('subCategoryListWrapper').style.display='block';" class="btn-secondary">Alt Kategoriler</button>
+                        <button onclick="ManagementModule.openCategoryModal('main', 'add')" class="btn-primary" style="margin-left: auto;"><i class="fas fa-plus"></i> Yeni Ekle</button>
+                    </div>
+
+                    <div id="mainCategoryListWrapper" class="category-list-wrapper" style="margin-top: 15px;">
+                        <h4>Ana Kategoriler <small>(Tür: İhtiyaç, Keyfi, Tasarruf, Gelir)</small></h4>
+                        <div id="mainCategoryList" class="management-list"></div>
+                    </div>
+                    
+                    <div id="subCategoryListWrapper" class="category-list-wrapper" style="display: none; margin-top: 15px;">
+                        <h4>Alt Kategoriler</h4>
+                        <div id="subCategoryList" class="management-list"></div>
+                    </div>
+                </div>
+            </div>
+            
+        </main>
+
+        <nav class="app-nav">
+            <div class="utility-btns">
+                <button id="navDashboard" class="active" onclick="App.showPage('Dashboard')"><i class="fas fa-home"></i> Ana Sayfa</button>
+                <button id="navReports" onclick="App.showPage('Reports')"><i class="fas fa-chart-line"></i> Raporlar</button>
+                <button id="navBills" onclick="App.showPage('Bills')"><i class="fas fa-calendar-check"></i> Ödemeler</button> 
+                <button id="navPortfolio" onclick="App.showPage('Portfolio')"><i class="fas fa-wallet"></i> Portföy</button>
+                <button id="navManagement" onclick="App.showPage('Management')"><i class="fas fa-cog"></i> Yönetim</button>
+                <button id="navDarkMode" onclick="Utils.toggleDarkMode()"><i class="fas fa-moon"></i></button>
+            </div>
+        </nav>
+        
+        <div id="categoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="document.getElementById('categoryModal').style.display='none'">&times;</span>
+                <h3 id="modalTitle">Kategori Yönetimi</h3>
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryType" value="main">
+                    <input type="hidden" id="originalCategoryName" value="">
+                    
+                    <label>Kategori Adı
+                        <input type="text" id="categoryName" required>
+                    </label>
+
+                    <div id="categoryUsageField">
+                        <label>Kullanım Türü
+                            <select id="categoryUsageSelect">
+                                <option value="needs">İhtiyaç (Zorunlu Gider)</option>
+                                <option value="wants">Keyfi (İsteğe Bağlı)</option>
+                                <option value="savings">Tasarruf/Yatırım</option>
+                                <option value="income">Gelir</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="parentCategoryField" style="display: none;">
+                         <label>Bağlı Ana Kategori
+                            <select id="parentCategorySelect"></select>
+                         </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="margin-top: 15px;">Kaydet</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="billModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="document.getElementById('billModal').style.display='none'">&times;</span>
+                <h3 id="billModalTitle">Yeni Tekrarlayan Ödeme Ekle</h3>
+                <form id="billForm" onsubmit="BillsModule.saveBill(event)">
+                    <input type="hidden" id="billId">
+                    <input type="hidden" id="billMode">
+                    
+                    <label>Ödeme Adı
+                        <input type="text" id="billTitle" placeholder="Ör: Ev Kirası, Netflix" required>
+                    </label>
+                    <label>Miktar (TL)
+                        <input type="number" step="0.01" id="billAmount" required>
+                    </label>
+                    <label>Ana Kategori
+                        <select id="mainCategorySelectBill" onchange="BillsModule.handleCategoryChangeBill()" required></select>
+                    </label>
+                    <label>Alt Kategori
+                        <select id="subCategorySelectBill" required></select>
+                    </label>
+                    <div style="display: flex; gap: 10px;">
+                        <label style="flex: 1;">Ayın Hangi Günü Ödenecek? (1-31)
+                            <input type="number" min="1" max="31" id="billDueDate" required>
+                        </label>
+                        <label style="flex: 1;">Sıklık
+                            <select id="billFrequency" required>
+                                <option value="monthly">Aylık</option>
+                                <option value="yearly">Yıllık</option>
+                            </select>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="margin-top: 15px;">Kaydet</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="manualPriceUpdateModal" class="modal">
+             <div class="modal-content">
+                 <span class="close-btn" onclick="document.getElementById('manualPriceUpdateModal').style.display='none'">&times;</span>
+                 <h3>Varlık Fiyatlarını Güncelle</h3>
+                 <form onsubmit="PortfolioModule.updateInvestmentPrices(event)">
+                     <div id="priceUpdateInputs" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                         </div>
+                     <button type="submit" class="btn-primary" style="margin-top: 20px;">Fiyatları Kaydet</button>
+                 </form>
+             </div>
+        </div>
+        
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
