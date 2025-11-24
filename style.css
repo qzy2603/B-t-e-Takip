@@ -1,0 +1,728 @@
+:root {
+    --primary-color: #0d47a1; /* Koyu Mavi */
+    --secondary-color: #fbc02d; /* Koyu Sarı */
+    --background-light: #f4f7f6;
+    --surface-light: #ffffff;
+    --text-color-light: #333;
+    --danger-color: #e53935;
+    --success-color: #43a047;
+    --warning-color: #ff9800;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* --- Dark Mode Variables --- */
+body.dark-mode {
+    --primary-color: #42a5f5; /* Açık Mavi */
+    --secondary-color: #ffb300; /* Açık Sarı */
+    --background-light: #121212;
+    --surface-light: #1e1e1e;
+    --text-color-light: #ffffff;
+    --danger-color: #ef5350;
+    --success-color: #66bb6a;
+    --warning-color: #ffa726;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Snooze Mode (Rakam Gizleme) --- */
+body.snooze-mode .amount,
+body.snooze-mode .balance-amount {
+    color: transparent !important;
+    text-shadow: 0 0 10px var(--text-color-light);
+    pointer-events: none;
+    user-select: none;
+}
+
+body.snooze-mode .amount::after,
+body.snooze-mode .balance-amount::after {
+    content: "••••••";
+    color: var(--text-color-light);
+}
+
+
+/* --- GLOBAL STYLES --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-light);
+    color: var(--text-color-light);
+    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 80px; /* Navigasyon barı için boşluk */
+}
+
+/* --- HEADER --- */
+.app-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+.app-header h1 {
+    font-size: 1.5em;
+    margin: 0;
+}
+
+/* --- MAIN CONTENT --- */
+.page-main {
+    flex-grow: 1;
+    padding: 15px;
+}
+
+.page-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+.page-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- CARDS --- */
+.card {
+    background-color: var(--surface-light);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    border: 1px solid var(--shadow-color);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+.card-header-flex h3 {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* --- BUTTONS & FORM ELEMENTS --- */
+button, .btn-primary, .btn-secondary {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s, opacity 0.2s;
+    font-size: 1em;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: color-mix(in srgb, var(--primary-color) 80%, black);
+}
+
+.btn-secondary {
+    background-color: color-mix(in srgb, var(--surface-light) 85%, var(--text-color-light));
+    color: var(--text-color-light);
+    border: 1px solid var(--text-color-light);
+}
+.dark-mode .btn-secondary {
+    background-color: color-mix(in srgb, var(--surface-light) 85%, white);
+    color: white;
+    border: 1px solid white;
+}
+.btn-secondary:hover {
+    opacity: 0.8;
+}
+
+form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="date"],
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: var(--background-light);
+    color: var(--text-color-light);
+    transition: border-color 0.3s;
+}
+
+form input:focus,
+form select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 5px rgba(13, 71, 161, 0.2);
+}
+
+/* Hızlı İşlem Formu */
+.transaction-input-card {
+    padding-bottom: 15px;
+}
+.type-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.type-selector button {
+    flex: 1;
+    background-color: #ddd;
+    color: #333;
+    opacity: 0.7;
+    border: 1px solid #ccc;
+}
+.type-selector button.active {
+    background-color: var(--primary-color);
+    color: white;
+    opacity: 1;
+}
+.type-selector #btnExpense.active {
+    background-color: var(--danger-color);
+}
+.type-selector #btnIncome.active {
+    background-color: var(--success-color);
+}
+
+/* --- DASHBOARD ELEMENTS --- */
+/* Yeni Detaylı Bakiye Özeti */
+.balance-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.balance-details > div {
+    padding: 10px;
+    border-radius: 8px;
+    background-color: var(--background-light);
+}
+.dark-mode .balance-details > div {
+    background-color: #2a2a2a;
+}
+.balance-details p {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+.dark-mode .balance-details p {
+    color: #aaa;
+}
+.balance-amount {
+    font-size: 1.1em;
+    font-weight: bold;
+    display: block;
+}
+.total-net .balance-amount {
+    font-size: 1.3em;
+    color: var(--primary-color);
+}
+
+.bill-status-summary {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+}
+.bill-status-summary div {
+    flex: 1;
+    padding: 0 5px;
+    border-right: 1px dashed #ccc;
+}
+.bill-status-summary div:last-child {
+    border-right: none;
+}
+.bill-status-summary span {
+    font-size: 1.5em;
+    font-weight: bold;
+    display: block;
+    margin-top: 5px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+.filter-buttons button {
+    flex: 1;
+    white-space: nowrap;
+    opacity: 0.7;
+    background-color: var(--surface-light);
+    border: 1px solid #ccc;
+    color: var(--text-color-light);
+}
+.filter-buttons button.active {
+    opacity: 1;
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.transaction-list {
+    list-style: none;
+    padding: 0;
+}
+.transaction-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+.dark-mode .transaction-list-item {
+    border-bottom: 1px solid #333;
+}
+.transaction-list-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-details {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+.transaction-details .category {
+    font-weight: bold;
+    display: block;
+}
+.transaction-details .note,
+.transaction-details .date {
+    font-size: 0.85em;
+    color: #666;
+    display: block;
+}
+.dark-mode .transaction-details .note,
+.dark-mode .transaction-details .date {
+    color: #aaa;
+}
+
+.transaction-amount {
+    font-weight: bold;
+    min-width: 90px;
+    text-align: right;
+}
+
+.loss {
+    color: var(--danger-color);
+}
+.gain {
+    color: var(--success-color);
+}
+
+.transaction-actions {
+    display: flex;
+    gap: 5px;
+}
+.transaction-actions button {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    padding: 5px;
+    font-size: 0.9em;
+}
+.transaction-actions button:hover {
+    opacity: 0.7;
+}
+
+.paid-status { color: var(--success-color); }
+.unpaid-status { color: var(--danger-color); }
+.pending { color: var(--warning-color); }
+
+
+/* --- BILLS (Ödemeler) --- */
+.bill-list {
+    list-style: none;
+    padding: 0;
+}
+.bill-list-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    font-weight: bold;
+    padding: 10px 0;
+    border-bottom: 2px solid var(--primary-color);
+    font-size: 0.9em;
+    text-align: center;
+}
+.bill-list-header span:first-child {
+    text-align: left;
+}
+
+.bill-list-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9em;
+}
+.dark-mode .bill-list-item {
+    border-bottom: 1px solid #333;
+}
+.bill-list-item:last-child {
+    border-bottom: none;
+}
+.bill-details {
+    text-align: left;
+    padding-right: 10px;
+}
+.bill-title {
+    font-weight: bold;
+    display: block;
+    font-size: 1.1em;
+}
+.bill-list-item .category {
+    font-size: 0.8em;
+    color: #666;
+    display: block;
+}
+.dark-mode .bill-list-item .category {
+    color: #aaa;
+}
+
+.bill-amount-cell {
+    font-weight: bold;
+    text-align: center;
+}
+.bill-due-date-cell {
+    text-align: center;
+    font-weight: bold;
+}
+
+.bill-status-cell {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+}
+.bill-status-cell button {
+    padding: 5px 8px;
+    font-size: 0.8em;
+    min-width: 60px;
+    background-color: #ddd;
+    color: #333;
+    opacity: 0.8;
+}
+.bill-status-cell button.status-paid { background-color: var(--success-color); color: white; opacity: 1; }
+.bill-status-cell button.status-pending { background-color: var(--warning-color); color: #333; opacity: 1; }
+.bill-status-cell button.status-unpaid { background-color: var(--danger-color); color: white; opacity: 1; }
+.bill-status-cell button:not(.active):hover { opacity: 0.6; }
+
+
+#overdueAlert {
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: var(--warning-color);
+    color: #333;
+    border-radius: 8px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* --- PORTFOLIO --- (Değişmedi) */
+.portfolio-summary .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    text-align: center;
+}
+.portfolio-summary .summary-grid p {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 3px;
+}
+.dark-mode .portfolio-summary .summary-grid p {
+    color: #aaa;
+}
+.portfolio-summary .summary-grid > div {
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+.dark-mode .portfolio-summary .summary-grid > div {
+    border: 1px solid #333;
+}
+
+.portfolio-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+.dark-mode .portfolio-list-item {
+    border-bottom: 1px solid #333;
+}
+.portfolio-list-item:last-child {
+    border-bottom: none;
+}
+.portfolio-details .symbol {
+    font-weight: bold;
+    font-size: 1.1em;
+    display: block;
+}
+.portfolio-details .quantity {
+    font-size: 0.85em;
+    color: #666;
+    display: block;
+}
+.dark-mode .portfolio-details .quantity {
+    color: #aaa;
+}
+
+/* --- REPORTS --- (Değişmedi) */
+.month-selector {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+.month-selector h3 {
+    margin: 0 10px;
+    flex-grow: 1;
+    text-align: center;
+    border-bottom: none;
+}
+.month-selector button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 12px;
+}
+.month-selector button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+}
+
+.rule-advice-box {
+    padding: 15px;
+    border-left: 5px solid var(--primary-color);
+    background-color: color-mix(in srgb, var(--surface-light) 95%, var(--primary-color));
+    border-radius: 5px;
+    margin-top: 15px;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+#ruleChartTable table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+#ruleChartTable th, #ruleChartTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+.dark-mode #ruleChartTable th, .dark-mode #ruleChartTable td {
+    border: 1px solid #333;
+}
+#ruleChartTable thead th {
+    background-color: var(--primary-color);
+    color: white;
+}
+#ruleChartTable .gain td {
+    background-color: color-mix(in srgb, var(--success-color) 15%, white);
+}
+#ruleChartTable .loss td {
+    background-color: color-mix(in srgb, var(--danger-color) 15%, white);
+}
+.dark-mode #ruleChartTable .gain td {
+    background-color: color-mix(in srgb, var(--success-color) 15%, black);
+}
+.dark-mode #ruleChartTable .loss td {
+    background-color: color-mix(in srgb, var(--danger-color) 15%, black);
+}
+
+/* --- MANAGEMENT (YÖNETİM) --- (Değişmedi) */
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.category-tabs button {
+    padding: 8px 12px;
+}
+.category-tabs .active {
+    background-color: var(--primary-color);
+    color: white;
+}
+.management-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.category-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: color-mix(in srgb, var(--surface-light) 90%, var(--primary-color));
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+.dark-mode .category-list-item {
+    background-color: color-mix(in srgb, var(--surface-light) 80%, black);
+    border: 1px solid #333;
+}
+.category-list-item span {
+    font-weight: bold;
+}
+.category-list-item small {
+    font-weight: normal;
+    color: #666;
+}
+.dark-mode .category-list-item small {
+    color: #aaa;
+}
+
+/* --- NAVIGATION --- (Değişmedi) */
+.app-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--surface-light);
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 10px var(--shadow-color);
+    z-index: 1000;
+}
+.dark-mode .app-nav {
+    border-top: 1px solid #333;
+}
+
+.utility-btns {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    padding: 5px 0;
+}
+
+.app-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 10px;
+    background: none;
+    border: none;
+    color: var(--text-color-light);
+    font-size: 0.75em;
+    font-weight: bold;
+    transition: color 0.2s;
+    flex: 1;
+    min-width: 0;
+}
+
+.app-nav button i {
+    font-size: 1.4em;
+    margin-bottom: 4px;
+    color: var(--text-color-light);
+}
+
+.app-nav button.active {
+    color: var(--primary-color);
+}
+.app-nav button.active i {
+    color: var(--primary-color);
+}
+
+/* Dark Mode Toggle Button */
+#navDarkMode {
+    flex: 0 0 auto;
+    width: 50px;
+}
+
+/* --- MODAL STYLES --- (Değişmedi) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: var(--surface-light);
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: var(--danger-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Responsive Düzenleme */
+@media (max-width: 600px) {
+    .app-nav button {
+        padding: 8px 5px;
+    }
+    .bill-list-header, .bill-list-item {
+        grid-template-columns: 1.5fr 1fr 0.8fr 1.5fr; /* Mobil için daha dar sütunlar */
+    }
+    .bill-status-cell button {
+        min-width: 45px;
+        padding: 5px 3px;
+    }
+}
